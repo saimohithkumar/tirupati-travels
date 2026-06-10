@@ -1,0 +1,6 @@
+{
+  "name": "Tirupati Travels & Cab Rental Dashboard",
+  "description": "Professional blueprint, fare calculator, SEO planner, and interactive prototyper for Tirupati travels and cab rental services.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
