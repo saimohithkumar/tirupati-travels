@@ -53,6 +53,54 @@ export interface Driver {
   tripsCompleted: number;
 }
 
+export interface LoginRecord {
+  id: string;
+  name: string;
+  phone: string;
+  loginTime: string;
+  loginDate: string;
+  simulatedIp: string;
+  device: string;
+  status: 'Active Booking' | 'Logged Out' | 'Idle Pilgrim';
+  lastAction: string;
+}
+
+export const INITIAL_LOGINS: LoginRecord[] = [
+  {
+    id: 'L1001',
+    name: 'Anoop Sharma',
+    phone: '+91 98450 11223',
+    loginTime: '08:15 AM',
+    loginDate: '2026-06-10',
+    simulatedIp: '103.45.201.55',
+    device: 'Mobile (Safari/iOS)',
+    status: 'Active Booking',
+    lastAction: 'Booked Cab to Bengaluru'
+  },
+  {
+    id: 'L1002',
+    name: 'Lakshmi Narayanan',
+    phone: '+91 91100 22334',
+    loginTime: '12:45 PM',
+    loginDate: '2026-06-10',
+    simulatedIp: '157.44.120.3',
+    device: 'Android (Chrome Mobile)',
+    status: 'Active Booking',
+    lastAction: 'Booked Round-trip to Chennai'
+  },
+  {
+    id: 'L1003',
+    name: 'Dr. Vineet Roy',
+    phone: '+91 97722 88291',
+    loginTime: '05:50 AM',
+    loginDate: '2026-06-10',
+    simulatedIp: '182.70.15.198',
+    device: 'Desktop (M1 Mac/Edge)',
+    status: 'Active Booking',
+    lastAction: 'Booked One-way to Vellore'
+  }
+];
+
 export interface SeoKeyword {
   keyword: string;
   monthlySearchVolume: number;

@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Booking, Driver, DRIVERS, VEHICLES, DESTINATIONS } from '../types';
+import { Booking, Driver, DRIVERS, VEHICLES, DESTINATIONS, LoginRecord } from '../types';
 import { 
   Users, MapPin, ClipboardList, CheckCircle2, ChevronRight, UserPlus, 
   Trash2, Eye, Star, AlertCircle, Phone, Smartphone, BadgePercent 
@@ -14,25 +14,31 @@ import { motion, AnimatePresence } from 'motion/react';
 interface AdminHubProps {
   bookings: Booking[];
   drivers: Driver[];
+  loginHistory?: LoginRecord[];
   onUpdateBookingStatus: (bookingId: string, newStatus: Booking['status']) => void;
   onAssignDriver: (bookingId: string, driverId: string) => void;
   onAddDriver: (newDriver: Driver) => void;
   onDeleteDriver: (driverId: string) => void;
   onDeleteBooking: (bookingId: string) => void;
+  onDeleteLogin?: (loginId: string) => void;
+  onClearLogins?: () => void;
 }
 
 export default function AdminHub({ 
   bookings, 
   drivers, 
+  loginHistory = [],
   onUpdateBookingStatus, 
   onAssignDriver, 
   onAddDriver,
   onDeleteDriver,
-  onDeleteBooking
+  onDeleteBooking,
+  onDeleteLogin,
+  onClearLogins
 }: AdminHubProps) {
   
-  // Tab within Admin: 'bookings' | 'drivers'
-  const [adminTab, setAdminTab] = useState<'bookings' | 'drivers'>('bookings');
+  // Tab within Admin: 'bookings' | 'drivers' | 'logins'
+  const [adminTab, setAdminTab] = useState<'bookings' | 'drivers' | 'logins'>('bookings');
 
   // New Driver Form state
   const [showAddDriverForm, setShowAddDriverForm] = useState(false);
@@ -116,6 +122,16 @@ export default function AdminHub({
           >
             Certified Drivers ({drivers.length})
           </button>
+          <button
+            onClick={() => setAdminTab('logins')}
+            className={`py-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer ${
+              adminTab === 'logins' 
+                ? 'border-amber-500 text-white' 
+                : 'border-transparent text-slate-400 hover:text-white'
+            }`}
+          >
+            👤 Passenger Logins & Sessions ({loginHistory.length})
+          </button>
         </div>
 
         {adminTab === 'drivers' && (
@@ -125,6 +141,16 @@ export default function AdminHub({
           >
             <UserPlus className="w-3.5 h-3.5" />
             Add New Driver
+          </button>
+        )}
+
+        {adminTab === 'logins' && onClearLogins && loginHistory.length > 0 && (
+          <button
+            onClick={onClearLogins}
+            className="py-1.5 px-3 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/20 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition-all hover:scale-[1.02]"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Clear Login Database
           </button>
         )}
       </div>
@@ -357,6 +383,88 @@ export default function AdminHub({
                   );
                 })}
               </div>
+            </motion.div>
+          )}
+
+          {adminTab === 'logins' && (
+            <motion.div 
+              key="logins"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-4"
+            >
+              <div className="p-4 bg-amber-500/5 text-amber-550/90 border border-white/5 rounded-xl text-xs leading-relaxed flex items-start gap-2.5">
+                <span className="text-base select-none">🛡️</span>
+                <div>
+                  <p className="font-semibold text-white">Simulated User Session Database Registry</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5 leading-normal">
+                    This registry tracks active customer credentials and browser sessions utilizing our Tirupati Travels outstation booking engines. When passengers enter details and book outstations, their contact log is persistently registered so dispatchers can contact them immediately.
+                  </p>
+                </div>
+              </div>
+
+              {loginHistory.length === 0 ? (
+                <div className="py-12 text-center rounded-xl border border-dashed border-white/10 text-slate-400 bg-[#121215]/50 space-y-2">
+                  <AlertCircle className="w-8 h-8 text-amber-500/80 mx-auto" />
+                  <p className="text-xs font-semibold">User session database is empty.</p>
+                  <p className="text-[10px] text-slate-500">New pilgrim logins & bookings register here in real-time.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-white/5">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-white/5 bg-[#121215] text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                        <th className="py-3 px-4">Session ID</th>
+                        <th className="py-3 px-4">Client Detail / Pilgrim</th>
+                        <th className="py-3 px-4">Verified Mobile Number</th>
+                        <th className="py-3 px-4">IP Address</th>
+                        <th className="py-3 px-4">Device Agent</th>
+                        <th className="py-3 px-4 text-center">Active Status</th>
+                        <th className="py-3 px-4 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-slate-300 text-xs bg-[#0c0c0e]">
+                      {loginHistory.map((login) => (
+                        <tr key={login.id} className="hover:bg-white/5 transition-colors">
+                          <td className="py-4 px-4 font-bold font-mono text-white text-[10px] tracking-wider">
+                            {login.id}
+                          </td>
+                          <td className="py-4 px-4 font-bold text-white">
+                            {login.name}
+                          </td>
+                          <td className="py-4 px-4 font-mono text-amber-500 font-semibold text-[11px]">
+                            {login.phone}
+                          </td>
+                          <td className="py-4 px-4 font-mono text-slate-400 text-[10px]">
+                            {login.simulatedIp}
+                          </td>
+                          <td className="py-4 px-4 text-slate-355 text-[11px]">
+                            {login.device}
+                          </td>
+                          <td className="py-4 px-4 text-center">
+                            <span className="inline-block text-[9px] bg-emerald-500/10 text-emerald-450 border border-emerald-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+                              {login.status}
+                            </span>
+                            <span className="block text-[9px] text-slate-500 mt-1 font-medium">{login.lastAction}</span>
+                          </td>
+                          <td className="py-4 px-4 text-right">
+                            {onDeleteLogin && (
+                              <button
+                                onClick={() => onDeleteLogin(login.id)}
+                                title="Revoke Login Session"
+                                className="p-1.5 bg-[#1a1a20]/60 hover:bg-rose-500/10 text-slate-400 hover:text-rose-450 rounded-lg border border-white/5 transition-all cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

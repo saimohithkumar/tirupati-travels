@@ -20,9 +20,9 @@ export default function AdminLockGate({ onUnlock, tabLabel }: AdminLockGateProps
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
-    // Accept standard sensible codes for easy assessment
-    const normalized = passcode.trim().toLowerCase();
-    if (normalized === 'admin' || normalized === '1234' || normalized === 'tirupati' || normalized === 'admin123') {
+    // Accept strictly the requested admin passcode
+    const normalized = passcode.trim();
+    if (normalized === '739682') {
       setIsSuccess(true);
       setErrorStatus(false);
       setTimeout(() => {
@@ -116,20 +116,8 @@ export default function AdminLockGate({ onUnlock, tabLabel }: AdminLockGateProps
         {/* Action Buttons */}
         <div className="flex gap-2">
           <button
-            type="button"
-            onClick={() => {
-              setPasscode('admin');
-              setIsSuccess(true);
-              setTimeout(() => onUnlock(), 300);
-            }}
-            className="flex-1 py-3 bg-white/5 hover:bg-white/10 active:scale-98 text-slate-300 text-xs font-bold rounded-xl transition-all border border-white/5 cursor-pointer"
-          >
-            Shorthand Bypass
-          </button>
-          
-          <button
             type="submit"
-            className="flex-1 py-3 bg-amber-500 hover:bg-amber-400 active:scale-98 text-black text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-lg cursor-pointer"
+            className="w-full py-3 bg-amber-500 hover:bg-amber-400 active:scale-98 text-black text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-lg cursor-pointer"
           >
             Authorize Check ➔
           </button>
@@ -179,7 +167,7 @@ export default function AdminLockGate({ onUnlock, tabLabel }: AdminLockGateProps
           </p>
         ) : (
           <p className="text-[10px] text-slate-500 leading-snug mt-2">
-            💡 <strong>Evaluation Note:</strong> Try clicking the <strong>Shorthand Bypass</strong> button above or enter the code <span className="font-mono text-amber-500">'admin'</span> to gain access.
+            🔒 Enter the secure 6-digit administrator passcode to unlock the strategic modules.
           </p>
         )}
       </form>

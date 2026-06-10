@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { Booking, Driver, INITIAL_BOOKINGS, DRIVERS } from './types';
+import React, { useState, useEffect } from 'react';
+import { Booking, Driver, INITIAL_BOOKINGS, DRIVERS, LoginRecord, INITIAL_LOGINS } from './types';
 import FareCalculator from './components/FareCalculator';
 import AdminHub from './components/AdminHub';
 import SeoPlanner from './components/SeoPlanner';
@@ -20,13 +20,61 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'user-ux' | 'admin' | 'seo' | 'trust'>('user-ux');
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
   
-  // Real-time synchronization state between panels
-  const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
-  const [drivers, setDrivers] = useState<Driver[]>(DRIVERS);
+  // Real-time synchronization state with localStorage database persistence
+  const [bookings, setBookings] = useState<Booking[]>(() => {
+    const saved = localStorage.getItem('tirupati_bookings');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+    }
+    return INITIAL_BOOKINGS;
+  });
+
+  const [drivers, setDrivers] = useState<Driver[]>(() => {
+    const saved = localStorage.getItem('tirupati_drivers');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+    }
+    return DRIVERS;
+  });
+
+  const [loginHistory, setLoginHistory] = useState<LoginRecord[]>(() => {
+    const saved = localStorage.getItem('tirupati_logins');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+    }
+    return INITIAL_LOGINS;
+  });
+
+  // Sync state mutations automatically to the database layer
+  useEffect(() => {
+    localStorage.setItem('tirupati_bookings', JSON.stringify(bookings));
+  }, [bookings]);
+
+  useEffect(() => {
+    localStorage.setItem('tirupati_drivers', JSON.stringify(drivers));
+  }, [drivers]);
+
+  useEffect(() => {
+    localStorage.setItem('tirupati_logins', JSON.stringify(loginHistory));
+  }, [loginHistory]);
 
   // Sync callbacks
   const handleNewBookingCreated = (newBooking: Booking) => {
     setBookings([newBooking, ...bookings]);
+
+    // Create a corresponding database login record for this user session
+    const newLogin: LoginRecord = {
+      id: 'L' + Math.floor(Math.random() * 9000 + 1000),
+      name: newBooking.customerName,
+      phone: newBooking.customerPhone,
+      loginTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+      loginDate: new Date().toISOString().split('T')[0],
+      simulatedIp: '103.' + Math.floor(Math.random() * 250 + 5) + '.' + Math.floor(Math.random() * 250 + 5) + '.' + Math.floor(Math.random() * 250 + 5),
+      device: navigator.userAgent.includes('Mobi') ? 'Mobile (Smartphone)' : 'Desktop (Browser)',
+      status: 'Active Booking',
+      lastAction: `Booked Cab to ${newBooking.destinationId.toUpperCase()}`
+    };
+    setLoginHistory(prev => [newLogin, ...prev]);
   };
 
   const handleUpdateBookingStatus = (bookingId: string, newStatus: Booking['status']) => {
@@ -250,11 +298,19 @@ export default function App() {
                     <AdminHub 
                       bookings={bookings}
                       drivers={drivers}
+                      loginHistory={loginHistory}
                       onUpdateBookingStatus={handleUpdateBookingStatus}
                       onAssignDriver={handleAssignDriver}
                       onAddDriver={handleAddDriver}
                       onDeleteDriver={handleDeleteDriver}
                       onDeleteBooking={handleDeleteBooking}
+                      onDeleteLogin={(loginId) => {
+                        setLoginHistory(prev => prev.filter(l => l.id !== loginId));
+                      }}
+                      onClearLogins={() => {
+                        setLoginHistory([]);
+                        localStorage.removeItem('tirupati_logins');
+                      }}
                     />
                   </>
                 )}
